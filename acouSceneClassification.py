@@ -1,5 +1,5 @@
 from keras.layers import Input, Dense, Activation, ZeroPadding2D, BatchNormalization, Flatten, Conv2D
-from keras.layers import MaxPooling2D
+from keras.layers import MaxPooling2D, Dropout
 from keras.models import Model
 from kapre.time_frequency import Spectrogram
 import numpy as np
@@ -31,16 +31,28 @@ class acouSceneClassification:
                         trainable_kernel=False, name='static_stft')(X_input)
 
         # CONV -> BN -> RELU Block applied to X
-        X = Conv2D(32, (3, 3), name='conv0')(X)
-        X = BatchNormalization(axis=3, name='bn0')(X)
+        X = Conv2D(8, (8, 8), name='conv0')(X)
+        X = BatchNormalization(name='bn0')(X)
         X = Activation('relu')(X)
+        X = MaxPooling2D((2, 4), name='max_pool0')(X)
+        X = Dropout(0.1, name='dropout0')(X)
 
-        # MAXPOOL
-        #X = MaxPooling2D((2, 2), name='max_pool')(X)
+        X = Conv2D(16, (16, 16), name='conv1')(X)
+        X = BatchNormalization(name='bn1')(X)
+        X = Activation('relu')(X)
+        X = MaxPooling2D((2, 4), name='max_pool1')(X)
+        X = Dropout(0.1, name='dropout1')(X)
+
+        X = Conv2D(16, (32, 32), name='conv2')(X)
+        X = BatchNormalization(name='bn2')(X)
+        X = Activation('relu')(X)
+        X = MaxPooling2D((2, 4), name='max_pool2')(X)
+        X = Dropout(0.1, name='dropout2')(X)
 
         # FLATTEN X (means convert it to a vector) + FULLYCONNECTED
         X = Flatten()(X)
-        X = Dense(10, activation='softmax', name='fc')(X)
+        X = Dense(32, activation='relu', name='fc0')(X)
+        X = Dense(10, activation='softmax', name='fc1')(X)
 
         # Create model. This creates your Keras model instance, you'll use this instance to train/test the model.
         model = Model(inputs=X_input, outputs=X, name='acouModel')
