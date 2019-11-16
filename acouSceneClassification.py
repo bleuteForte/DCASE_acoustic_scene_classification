@@ -1,8 +1,10 @@
 from keras.layers import Input, Dense, Activation, ZeroPadding2D, BatchNormalization, Flatten, Conv2D
 from keras.layers import MaxPooling2D, Dropout
 from keras.models import Model
-import essentia
-from essentia.standard import *
+#import essentia
+#from essentia.standard import *
+from librosa.filters import get_window
+from librosa.feature import melspectrogram
 #from kapre.time_frequency import Spectrogram
 import numpy as np
 
@@ -14,24 +16,24 @@ class acouSceneClassification:
         self.batch_size = batch_size
         self.input_shape = input_shape
         #self.mod   el = self.Model_build(input_shape=input_shape)
-        self.w = Windowing(type='hann')
-        self.spectrum = Spectrum()  # FFT() would return the complex FFT, here we just want the magnitude spectrum
-        self.mfcc = MFCC()
+        self.Nx = 512
+        self.w = get_window(window='hann', Nx=self.Nx)
+        #self.spectrum = Spectrum()  # FFT() would return the complex FFT, here we just want the magnitude spectrum
+        #self.mfcc = MFCC()
         self.numPreprocessFrames = 10
         self.frameSize = input_shape[1] / self.numPreprocessFrames
         self.inputData = []
         self.model = 0
 
-    def preprocess_data(self, x):
-        for signal in x:
-            melbands = []
-            signal = np.squeeze(signal)
-            for frame in FrameGenerator(signal, frameSize=self.frameSize, hopSize=self.frameSize, startFromZero=True):
-                mfcc_bands, _ = self.mfcc(self.spectrum(self.w(frame)))
-                melbands.extend(mfcc_bands)
-            self.inputData.append(np.array(melbands))
 
-        self.inputData = np.array(self.inputData)
+    def preprocess_data(self, x):
+        melbands = []
+        for signal in x:
+            signal = np.squeeze(signal)
+            mel_spec = melspectrogram(y=signal, n_fft=44100, hop_length=44100, n_mels=40)
+            melbands.append(np.reshape(mel_spec,(mel_spec.shape[0]*mel_spec.shape[1],)))
+        self.inputData = np.array(melbands)
+
 
     def Model_build(self):
         """
