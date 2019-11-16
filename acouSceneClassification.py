@@ -1,6 +1,6 @@
 from keras.layers import Input, Dense, Activation, ZeroPadding2D, BatchNormalization, Flatten, Conv2D
 from keras.layers import MaxPooling2D, Dropout
-from keras.models import Model
+from keras.models import Model, load_model
 #import essentia
 #from essentia.standard import *
 from librosa.filters import get_window
@@ -25,7 +25,6 @@ class acouSceneClassification:
         self.inputData = []
         self.model = 0
 
-
     def preprocess_data(self, x):
         melbands = []
         for signal in x:
@@ -34,8 +33,7 @@ class acouSceneClassification:
             melbands.append(np.reshape(mel_spec,(mel_spec.shape[0]*mel_spec.shape[1],)))
         self.inputData = np.array(melbands)
 
-
-    def Model_build(self):
+    def model_build(self):
         """
         Implementation of the model.
 
@@ -76,7 +74,19 @@ class acouSceneClassification:
         # Create model. This creates your Keras model instance, you'll use this instance to train/test the model.
         self.model = Model(inputs=X_input, outputs=X, name='acouModel')
 
-    def Model_training(self, y):
+    def model_training(self, y):
         self.model.compile(optimizer='RMSProp', loss='categorical_crossentropy', metrics=["accuracy"])
         self.model.fit(self.inputData, y, epochs=self.epochs, batch_size=self.batch_size)
 
+    def model_evaluate(self, X_test, y_test):
+        preds = self.model.evaluate(x=X_test, y=y_test)
+
+        print()
+        print("Loss = " + str(preds[0]))
+        print("Test Accuracy = " + str(preds[1]))
+
+    def model_save(self, path, filename):
+        self.model.save(path+filename)
+
+    def model_load(self, path):
+        self.model = load_model(path)
