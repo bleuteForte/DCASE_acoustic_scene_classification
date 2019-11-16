@@ -4,12 +4,14 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 import os
-import mnist
+#import mnist
+
 
 def listdir_nohidden(path, numFiles):
     for f in os.listdir(path)[:numFiles]:
         if not f.startswith('.'):
             yield f
+
 
 def indices_to_one_hot(data, nb_classes):
     """Convert an iterable of indices to one-hot encoded labels."""
@@ -32,6 +34,7 @@ def load_data_mnist():
 
     return train_images, test_images, train_labels, test_labels
 
+
 def load_data(mypath):
     X = []
     y = []
@@ -49,32 +52,21 @@ def load_data(mypath):
             X.append(src[:input_size])
             y.append([idx])
 
-    # Normalize data
-    X = np.array(X)
-    scaler.fit(X)
-    X = scaler.transform(X)
-
     # Shape data
     X = X[:, np.newaxis, :]
     y_ = indices_to_one_hot(y, numClass)
 
     # Split into training and testing set
     X_train, X_test, y_train, y_test = train_test_split(X, y_, test_size=0.2)
+
+    # Normalize data
+    X_train = np.array(X_train)
+    scaler.fit(X_train)
+    X_train = scaler.transform(X_train)
+    X_test = scaler.transform(X_test)
+
     return X_train, X_test, y_train, y_test
 
-
-def training_model(X_train, y_train):
-    input_shape = X_train[0].shape
-    m = acouSceneClassification(input_shape, epochs=1, batch_size=2)
-    m.Model_training(X_train, y_train)
-    return m
-
-def testing_model(m, X_test, y_test):
-    preds = m.model.evaluate(x=X_test, y=y_test, batch_size=32)
-
-    print()
-    print("Loss = " + str(preds[0]))
-    print("Test Accuracy = " + str(preds[1]))
 
 def main():
 
@@ -89,15 +81,17 @@ def main():
     m.preprocess_data(X_train)
 
     # Build model
-    m.Model_build()
+    m.model_build()
 
     # Train model
-    m.Model_training(y_train)
+    m.model_training(y_train)
 
     # Testing model
-    #m.Model_testing()
+    m.model_evaluate(X_test, y_test)
 
-    #testing_model(m, X_test, y_test)
+    m.model_save('/Users/shengdi/PycharmProjects/DCASE_acoustic_scene_classification', '3_classes_model.h5')
+
+
 
 if __name__ == '__main__':
     main()
