@@ -77,7 +77,7 @@ class acouSceneClassification:
 
     def model_training(self, y):
         callbacks = [EarlyStopping(monitor='val_loss', patience=2)]
-        self.model.compile(optimizer='RMSProp', loss='categorical_crossentropy', metrics=["accuracy"])
+        self.model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=["accuracy"])
         self.model.fit(self.inputData, y, epochs=self.epochs, batch_size=self.batch_size, callbacks=callbacks,
                        validation_split=0.1)
 
@@ -91,6 +91,7 @@ class acouSceneClassification:
 
     def model_save(self, path, filename):
         self.model.save(path+filename)
+        print('model_saved'+' '+path+' '+filename)
 
     def model_load(self, path):
         self.model = load_model(path)

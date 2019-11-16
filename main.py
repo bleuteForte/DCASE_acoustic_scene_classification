@@ -40,7 +40,7 @@ def load_data(mypath):
     y = []
     numClass = 3
     input_size = 441000
-    numFiles = 400
+    numFiles = 600
     scaler = MinMaxScaler(feature_range=(-1, 1))
 
     for idx in range(0, numClass):
@@ -81,7 +81,7 @@ def main():
 
     # Pre-process data
     input_shape = X_train[0].shape
-    m = acouSceneClassification(input_shape, epochs=10, batch_size=16)
+    m = acouSceneClassification(input_shape, epochs=20, batch_size=16)
     m.preprocess_data(X_train)
 
     # Build model
@@ -94,6 +94,7 @@ def main():
     m.model_evaluate(X_test, y_test)
 
     m.model_save(model_path, '3_classes_model.h5')
+
 
 if __name__ == '__main__':
     main()
