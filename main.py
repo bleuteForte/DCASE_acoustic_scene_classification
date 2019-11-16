@@ -6,7 +6,10 @@ from sklearn.preprocessing import MinMaxScaler
 import os
 #import mnist
 import sys
+<<<<<<< HEAD
 
+=======
+>>>>>>> 23f74c765934eee3ee8656ed7ff57063b1de390f
 
 def listdir_nohidden(path, numFiles):
     for f in os.listdir(path)[:numFiles]:
@@ -73,10 +76,16 @@ def load_data(mypath):
 
 
 def main():
+    model_path = sys.argv[1]
+    data_path = sys.argv[2]
 
     # Load data
+<<<<<<< HEAD
     mypath = "/Users/bassed/Downloads/TAU-urban-acoustic-scenes-2019-development"
     X_train, X_test, y_train, y_test = load_data(mypath)
+=======
+    X_train, X_test, y_train, y_test = load_data(data_path)
+>>>>>>> 23f74c765934eee3ee8656ed7ff57063b1de390f
     #X_train, X_test, y_train, y_test = load_data_mnist()
 
     # Pre-process data
@@ -93,10 +102,14 @@ def main():
     # Testing model
     m.model_evaluate(X_test, y_test)
 
+<<<<<<< HEAD
 
     #m.model_save('/Users/shengdi/PycharmProjects/DCASE_acoustic_scene_classification', '3_classes_model.h5')
 
 
+=======
+    m.model_save(model_path, '3_classes_model.h5')
+>>>>>>> 23f74c765934eee3ee8656ed7ff57063b1de390f
 
 if __name__ == '__main__':
     main()
