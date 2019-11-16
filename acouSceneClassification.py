@@ -7,6 +7,7 @@ from librosa.filters import get_window
 from librosa.feature import melspectrogram
 #from kapre.time_frequency import Spectrogram
 import numpy as np
+from keras.callbacks import EarlyStopping
 
 
 class acouSceneClassification:
@@ -30,7 +31,7 @@ class acouSceneClassification:
         for signal in x:
             signal = np.squeeze(signal)
             mel_spec = melspectrogram(y=signal, n_fft=44100, hop_length=44100, n_mels=40)
-            melbands.append(np.reshape(mel_spec,(mel_spec.shape[0]*mel_spec.shape[1],)))
+            melbands.append(np.reshape(mel_spec,(mel_spec.shape[0]*mel_spec.shape[1],),order='F'))
         self.inputData = np.array(melbands)
 
     def model_build(self):
@@ -75,11 +76,14 @@ class acouSceneClassification:
         self.model = Model(inputs=X_input, outputs=X, name='acouModel')
 
     def model_training(self, y):
+        callbacks = [EarlyStopping(monitor='val_loss', patience=2)]
         self.model.compile(optimizer='RMSProp', loss='categorical_crossentropy', metrics=["accuracy"])
-        self.model.fit(self.inputData, y, epochs=self.epochs, batch_size=self.batch_size)
+        self.model.fit(self.inputData, y, epochs=self.epochs, batch_size=self.batch_size, callbacks=callbacks,
+                       validation_split=0.1)
 
     def model_evaluate(self, X_test, y_test):
-        preds = self.model.evaluate(x=X_test, y=y_test)
+        self.preprocess_data(X_test)
+        preds = self.model.evaluate(x=self.inputData, y=y_test)
 
         print()
         print("Loss = " + str(preds[0]))

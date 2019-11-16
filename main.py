@@ -5,6 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 import os
 #import mnist
+import sys
 
 
 def listdir_nohidden(path, numFiles):
@@ -40,7 +41,7 @@ def load_data(mypath):
     y = []
     numClass = 3
     input_size = 441000
-    numFiles = 60
+    numFiles = 400
     scaler = MinMaxScaler(feature_range=(-1, 1))
 
     for idx in range(0, numClass):
@@ -53,7 +54,7 @@ def load_data(mypath):
             y.append([idx])
 
     # Shape data
-    X = X[:, np.newaxis, :]
+    X = np.array(X)
     y_ = indices_to_one_hot(y, numClass)
 
     # Split into training and testing set
@@ -65,19 +66,22 @@ def load_data(mypath):
     X_train = scaler.transform(X_train)
     X_test = scaler.transform(X_test)
 
+    X_train = X_train[:,np.newaxis,:]
+    X_test = X_test[:, np.newaxis, :]
+
     return X_train, X_test, y_train, y_test
 
 
 def main():
 
     # Load data
-    mypath = "/Users/bassed/Downloads/TAU-urban-acoustic-scenes-2019-evaluation"
+    mypath = "/Users/bassed/Downloads/TAU-urban-acoustic-scenes-2019-development"
     X_train, X_test, y_train, y_test = load_data(mypath)
     #X_train, X_test, y_train, y_test = load_data_mnist()
 
     # Pre-process data
     input_shape = X_train[0].shape
-    m = acouSceneClassification(input_shape, epochs=1, batch_size=16)
+    m = acouSceneClassification(input_shape, epochs=10, batch_size=16)
     m.preprocess_data(X_train)
 
     # Build model
@@ -89,7 +93,8 @@ def main():
     # Testing model
     m.model_evaluate(X_test, y_test)
 
-    m.model_save('/Users/shengdi/PycharmProjects/DCASE_acoustic_scene_classification', '3_classes_model.h5')
+
+    #m.model_save('/Users/shengdi/PycharmProjects/DCASE_acoustic_scene_classification', '3_classes_model.h5')
 
 
 
